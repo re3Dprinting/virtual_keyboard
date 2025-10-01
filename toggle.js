@@ -1,34 +1,40 @@
-window.addEventListener('load', function() {
-	document.getElementById("toggleOn").onclick = function() {
-		chrome.extension.sendRequest({method: "toogleKeyboardOn"}, function(response) {
-			window.close();	
-		});
-	}
-	document.getElementById("settings").onclick = function() {
-		window.open(chrome.extension.getURL("options.html"));
-	}
-	document.getElementById("toggleOff").onclick = function() {
-		chrome.extension.sendRequest({method: "toogleKeyboardOff"}, function(response) {
-			window.close();	
-		});
-	}
-	document.getElementById("toggleDemand").onclick = function() {
-		chrome.extension.sendRequest({method: "toogleKeyboardDemand"}, function(response) {
-			window.close();	
-		});
-	}
-	document.getElementById("goToUrl").onclick = function() {
-		chrome.extension.sendRequest({method: "openUrlBar"}, function(response) {
-			eval(callback)(response.data);
-		});
-		window.close();
-	}
-if (localStorage["keyboardEnabled"] == "demand") {
-	document.getElementById("toggleDemand").className = "active";
-} else if (localStorage["keyboardEnabled"] != "false") {
-	document.getElementById("toggleOn").className = "active";
-} else {
-	document.getElementById("toggleOff").className = "active";
-}
+document.addEventListener('DOMContentLoaded', () => {
+  const byId = (id) => document.getElementById(id);
 
-}, false);
+  const ask = (msg) => chrome.runtime.sendMessage(msg, () => { /* ignore */ });
+
+  // Toggle On
+  const btnOn = byId('btn_on') || byId('toggleOn') || byId('on');
+  if (btnOn) btnOn.addEventListener('click', () => {
+    ask({ method: 'toogleKeyboardOn' });
+  });
+
+  // Toggle Off
+  const btnOff = byId('btn_off') || byId('toggleOff') || byId('off');
+  if (btnOff) btnOff.addEventListener('click', () => {
+    ask({ method: 'toogleKeyboardOff' });
+  });
+
+  // Demand
+  const btnDemand = byId('btn_demand') || byId('toggleDemand') || byId('demand');
+  if (btnDemand) btnDemand.addEventListener('click', () => {
+    ask({ method: 'toogleKeyboardDemand' });
+  });
+
+  // Open URL bar
+  const btnUrl = byId('btn_url') || byId('openUrlBar') || byId('url');
+  if (btnUrl) btnUrl.addEventListener('click', () => {
+    ask({ method: 'openUrlBar' });
+  });
+
+  // Options page
+  const btnOpts = byId('btn_options') || byId('openOptions') || byId('options');
+  if (btnOpts) btnOpts.addEventListener('click', () => {
+    // Prefer native API in MV3
+    if (chrome.runtime.openOptionsPage) {
+      chrome.runtime.openOptionsPage();
+    } else {
+      window.open(chrome.runtime.getURL('options.html'));
+    }
+  });
+});
