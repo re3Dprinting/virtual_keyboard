@@ -92,7 +92,7 @@ function virtualKeyboardChromeExtension_shiftButtonKeys() {
 
 function virtualKeyboardChromeExtension_click(key, skip) {
 	if (top != self) {
-		chrome.extension.sendRequest({method: "clickFromIframe", key: key, skip: skip, frame: this.frameElement.id });
+		chrome.runtime.sendMessage({method: "clickFromIframe", key: key, skip: skip, frame: this.frameElement.id });
 	} else {
 		if (key != "Close") {
 			if (skip == undefined) { skip = false; }
@@ -110,7 +110,7 @@ function virtualKeyboardChromeExtension_click(key, skip) {
 			case "empty":
 				break;
 			case "Settings":
-				window.open(chrome.extension.getURL("options.html"));
+				// (kiosk) suppressed auto-open of options.html
 				break;
 			case '&123':
 				virtualKeyboardChromeExtensionFormat = !virtualKeyboardChromeExtensionFormat;
@@ -351,13 +351,13 @@ function setCaretCharacterOffset(element, set_caret){
 
 
 function setting_load(key, callback) {
-	chrome.extension.sendRequest({method: "getLocalStorage", key: key}, function(response) {
+	chrome.runtime.sendMessage({method: "getLocalStorage", key: key}, function(response) {
 	  	eval(callback)(response.data);
 	});
 }
 
 function setting_reloadKeyboardToggle(openState) {
-	chrome.extension.sendRequest({method: "getLocalStorage", key: "keyboardEnabled"}, function(response) {
+	chrome.runtime.sendMessage({method: "getLocalStorage", key: "keyboardEnabled"}, function(response) {
 	  	virtualKeyboardChromeExtensionKeyboardEnabled = response.data;
 		if (openState) {
 			if ((document.activeElement.tagName == "INPUT") || (document.activeElement.tagName == "TEXTAREA")) {
@@ -372,7 +372,7 @@ function setting_reloadKeyboardToggle(openState) {
 }
 
 function setting_set(key, value) {
-	chrome.extension.sendRequest({method: "setLocalStorage", key: key, value: value}, function(response) {});
+	chrome.runtime.sendMessage({method: "setLocalStorage", key: key, value: value}, function(response) {});
 }
 
 function virtualKeyboardChromeExtension_getElementPositionY(obj) {
@@ -409,7 +409,7 @@ function virtualKeyboardChromeExtension_open_part2(pos) {
 	}
 	virtualKeyboardChromeExtensionState = true;
 	document.getElementById('virtualKeyboardChromeExtension').style.display = "";
-	chrome.extension.sendRequest({method: "getSmallKeyboardCoords"}, function(response) {
+	chrome.runtime.sendMessage({method: "getSmallKeyboardCoords"}, function(response) {
 		if (response.smallKeyboard == "true") {
 			if (hardwareAcceleration) {
 				document.getElementById('virtualKeyboardChromeExtension').style.setProperty("-webkit-transform", "translate3d(0,0,0)");
@@ -511,7 +511,7 @@ function virtualKeyboardChromeExtension_open(posY, posX, force) {
 			virtualKeyboardChromeExtensionClickedElem.id = "CVK_E_"+iframeElemSent;
 			iframeElemSent++;
 		}
-        chrome.extension.sendRequest({method: "openFromIframe", posY: posY, posX: posX, force: force, frame: this.frameElement.id, elem: virtualKeyboardChromeExtensionClickedElem.id });
+        chrome.runtime.sendMessage({method: "openFromIframe", posY: posY, posX: posX, force: force, frame: this.frameElement.id, elem: virtualKeyboardChromeExtensionClickedElem.id });
 	} else {
 		document.body.removeChild(virtualKeyboardChromeExtensionKeyboardElement);
 		document.body.appendChild(virtualKeyboardChromeExtensionKeyboardElement);
@@ -543,7 +543,7 @@ function virtualKeyboardChromeExtension_open(posY, posX, force) {
 						delete data2;
 					}
 				}
-				xmlhttp.open("GET",chrome.extension.getURL("keyboard_"+virtualKeyboardChromeExtensionKeyboardLayout1Setting+".html"),true);
+				xmlhttp.open("GET",chrome.runtime.getURL("keyboard_"+virtualKeyboardChromeExtensionKeyboardLayout1Setting+".html"),true);
 				xmlhttp.send();
 				virtualKeyboardChromeExtensionKeyboardLoaded1 = virtualKeyboardChromeExtensionKeyboardLayout1Setting;
 			} else {
@@ -721,7 +721,7 @@ var virtualKeyboardChromeExtensionRequestRefresh = false;
 
 function xk_settings_load_main(response) {
 	if (response.openedFirstTime == undefined) {
-		chrome.extension.sendRequest({ method: "createTab", url: chrome.extension.getURL("options.html") });		
+		chrome.runtime.sendMessage({ method: "createTab", url: chrome.runtime.getURL("options.html") });		
 		setting_set("openedFirstTime", "true");
 	}
 
@@ -754,7 +754,7 @@ function init_virtualKeyboardChromeExtension(firstTime) {
 		if (top == self) {
 			if (virtualKeyboardChromeExtensionTouchEvents == undefined) {			
 				if ((document.getElementById('virtualKeyboardChromeExtension').getAttribute("_state") != "open") || (virtualKeyboardChromeExtensionRequestRefresh)) {
-					chrome.extension.sendRequest({method: "loadKeyboardSettings"}, xk_settings_load_main);
+					chrome.runtime.sendMessage({method: "loadKeyboardSettings"}, xk_settings_load_main);
 				} 
 			} else {
 				document.getElementById("virtualKeyboardChromeExtensionUrlBarTextBox").onblur = function() {
@@ -852,7 +852,7 @@ function init_virtualKeyboardChromeExtension(firstTime) {
 			}
 		} else {
 			if (virtualKeyboardChromeExtensionTouchEvents == undefined) {			
-				chrome.extension.sendRequest({method: "loadKeyboardSettings"}, function(response) {
+				chrome.runtime.sendMessage({method: "loadKeyboardSettings"}, function(response) {
 					virtualKeyboardChromeExtensionTouchEvents = response.touchEvents;
 					if (virtualKeyboardChromeExtensionTouchEvents == undefined) { virtualKeyboardChromeExtensionTouchEvents = "false"; }
 					init_virtualKeyboardChromeExtension(true);
@@ -1143,7 +1143,7 @@ function init_virtualKeyboardChromeExtension(firstTime) {
 				}
 				delete m;
 				if (document.getElementById("settingsButton") != undefined) {
-					chrome.extension.sendRequest({method: "getLocalStorage", key: "keyboardLayoutsList"}, function(response) {
+					chrome.runtime.sendMessage({method: "getLocalStorage", key: "keyboardLayoutsList"}, function(response) {
 						var data = response.data;
 						document.getElementById("settingsButton").style.display = "none"; 
 						if (data != undefined) {
@@ -1185,7 +1185,7 @@ function init_virtualKeyboardChromeExtension(firstTime) {
 													virtualKeyboardChromeExtensionClickedElem.focus();
 													break;
 												case "openSettings":
-													window.open(chrome.extension.getURL("options.html"));
+													// (kiosk) suppressed auto-open of options.html
 													break;
 												case "key":
 													var k = this.getAttribute("_key");
@@ -1218,7 +1218,7 @@ function init_virtualKeyboardChromeExtension(firstTime) {
 													virtualKeyboardChromeExtensionClickedElem.focus();
 													break;
 												case "openSettings":
-													window.open(chrome.extension.getURL("options.html"));
+													// (kiosk) suppressed auto-open of options.html
 													break;
 												case "key":
 													var k = this.getAttribute("_key");
@@ -1346,7 +1346,7 @@ function init_virtualKeyboardChromeExtension_false_iframe() {
 
 	
 if (top == self) {
-	chrome.extension.onRequest.addListener(function(request) {
+	chrome.runtime.onMessage.addListener(function(request) {
 		if (request.method == "openFromIframe") {
             virtualKeyboardChromeExtension_generate_onchange();
 			virtualKeyboardChromeExtensionClickedElem = document.getElementById(request.frame).contentDocument.getElementById(request.elem);
@@ -1379,14 +1379,14 @@ if (top == self) {
 	}
 
 	var link = document.createElement("link");
-	link.href = chrome.extension.getURL("style.css");
+	link.href = chrome.runtime.getURL("style.css");
 	link.type = "text/css";
 	link.rel = "stylesheet";
 	document.getElementsByTagName("head")[0].appendChild(link);
 	delete link;
 		
 	var xhr = new XMLHttpRequest();
-	xhr.open("GET", chrome.extension.getURL("keyboard.html"), true);
+	xhr.open("GET", chrome.runtime.getURL("keyboard.html"), true);
 	xhr.onreadystatechange = vk_ajax_load_main;
 	xhr.send();
 } else {
@@ -1399,7 +1399,7 @@ if (top == self) {
 function vk_ajax_load_main() {
   if (xhr.readyState == 4) {
 	virtualKeyboardChromeExtensionKeyboardElement = document.createElement("div");
-	chrome.extension.sendRequest({method: "initLoadKeyboardSettings"}, function(response) {
+	chrome.runtime.sendMessage({method: "initLoadKeyboardSettings"}, function(response) {
 		//hardwareAcceleration
 		if (response.hardwareAcceleration == "false") {
 			hardwareAcceleration = false;
