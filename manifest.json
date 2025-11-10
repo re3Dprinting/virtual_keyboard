@@ -1,7 +1,7 @@
 {
   "name": "Virtual Keyboard",
   "description": "Fullscreen on-screen virtual keyboard for touch screen devices",
-  "version": "1.12.8",
+  "version": "1.12.9",
   "manifest_version": 3,
 
   "icons": {
@@ -16,15 +16,8 @@
     "default_popup": "toggle.html"
   },
 
-  "options_ui": {
-    "page": "options.html",
-    "open_in_tab": true
-  },
-
   "background": {
     "service_worker": "background.js"
-    /* If background.js isn't needed, you can delete this block
-       and remove the file. */
   },
 
   "permissions": ["tabs", "storage"],
@@ -47,7 +40,6 @@
         "keyboard_en.html",
         "keyboard_ru.html",
         "style.css",
-        "options/*",
         "toggle.html",
         "toggle.js",
         "icons/*",
