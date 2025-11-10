@@ -1,4 +1,11 @@
 // background.js (MV3 service worker)
+chrome.runtime.onInstalled.addListener(async () => {
+  const { openedFirstTime } = await chrome.storage.local.get('openedFirstTime');
+  if (openedFirstTime == null) {
+    await chrome.storage.local.set({ openedFirstTime: true });
+  }
+});
+
 
 // ---------- helpers ----------
 const storageGet = (keys) =>
@@ -171,10 +178,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       }
 
       case 'createTab': {
-        if (request.url) await chrome.tabs.create({ url: request.url });
+        const url = request.url || '';
+        if (url.includes('options.html')) { sendResponse({ blocked: true }); break; }
+        if (url) await chrome.tabs.create({ url });
         sendResponse({});
         break;
       }
+
 
       default:
         sendResponse({});

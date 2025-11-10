@@ -27,6 +27,13 @@ var autoTriggerAfter = 1;
 var lastHovered = null;
 var lastHoveredTO = null;
 
+chrome.storage.local.get(['openedFirstTime'], ({ openedFirstTime }) => {
+  if (openedFirstTime == null) {
+    chrome.storage.local.set({ openedFirstTime: true });
+  }
+});
+
+
 function virtualKeyboardChromeExtension_generate_onchange()
     {
     if (virtualKeyboardChromeExtensionElemChanged==true)
